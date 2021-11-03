@@ -1,23 +1,20 @@
 package version1;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
-import java.time.Duration;
-import java.time.Instant;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 public class Client {
     private static final String SERVER_IP = "127.0.0.1";
-    private static final int SERVER_PORT = 8080;
+    private static final int SERVER_PORT = 3400;
 
     public static void main(String[] args) throws IOException, InterruptedException {
         BufferedReader keyboard = new BufferedReader(new InputStreamReader((System.in))); // reads user keyboard input
         Socket socket;
-        String preferredPort = "", command = "";
-        int nThreads = 1, operationsRan = 0;
+        DecimalFormat df = new DecimalFormat("##.##");
+        String preferredPort = "", command;
+        int nThreads, operationsRan = 0;
 
         System.out.println("\nWelcome to the iterative socket client!");
         System.out.print("Please insert the server port you'd like to connect to (enter -1 to connect to the default port): ");
@@ -31,7 +28,7 @@ public class Client {
         try {
             if (Integer.parseInt(preferredPort) == -1) {
                 socket = new Socket(SERVER_IP, SERVER_PORT);
-                preferredPort = "8080";
+                preferredPort = "3400";
             } else {
                 socket = new Socket(SERVER_IP, Integer.parseInt(preferredPort));
             }
@@ -40,10 +37,10 @@ public class Client {
         } catch (NumberFormatException ex) {
             System.out.println("\nUnable to connect to the specified port, connecting to the default port...");
             socket = new Socket(SERVER_IP, SERVER_PORT);
-            preferredPort = "8080";
+            preferredPort = "3400";
         }
 
-        BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+//        BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
         PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
@@ -66,31 +63,16 @@ public class Client {
 
            try {
                if(Integer.parseInt(command) > 0 && Integer.parseInt(command) < 8) {
-                   RequestType reqType = RequestType.Uptime;
-
-                   switch(Integer.parseInt(command)) {
-                       case 1:
-                           reqType = RequestType.DateTime;
-                           break;
-                       case 2:
-                           reqType = RequestType.Uptime;
-                           break;
-                       case 3:
-                           reqType = RequestType.Memory;
-                           break;
-                       case 4:
-                           reqType = RequestType.Netstat;
-                           break;
-                       case 5:
-                           reqType = RequestType.CurrentUsers;
-                           break;
-                       case 6:
-                           reqType = RequestType.RunningProcesses;
-                           break;
-                       case 7:
-                           reqType = RequestType.Quit;
-                           break;
-                   }
+                   RequestType reqType = switch (Integer.parseInt(command)) {
+                       case 1 -> RequestType.DateTime;
+                       case 2 -> RequestType.Uptime;
+                       case 3 -> RequestType.MemoryUse;
+                       case 4 -> RequestType.Netstat;
+                       case 5 -> RequestType.CurrentUsers;
+                       case 6 -> RequestType.RunningProcesses;
+                       case 7 -> RequestType.Quit;
+                       default -> RequestType.None;
+                   };
 
                    out.println(reqType);
 
@@ -111,40 +93,56 @@ public class Client {
 
                    for(ClientHandler thread: threads) thread.start();
 
-                   for(ClientHandler thread: threads) {
-                       try {
-                           thread.join();
-                       } catch(InterruptedException e) {
-                           System.out.println("Unable to join threads - " + e.getMessage() + "\n");
-                       }
-                   }
-                   CSVParser parser = new CSVParser();
-                   ArrayList<String> column = new ArrayList<String>();
-                   double averageTime = 0;
+                   for(ClientHandler thread: threads) thread.join();
 
-                   column.add(reqType.name());
+
+                   ArrayList<String> columns = new ArrayList<>();
+                   double averageTime;
+
+                   columns.add(reqType.name());
 
                    long turnAroundTime = 0;
 
                    for(int i = 0; i < ClientHandler.requestTotals.size(); i++) {
                        String currentThreadTime = ClientHandler.requestTotals.get(i).toString();
 
-                       column.add(currentThreadTime);
+                       columns.add(currentThreadTime);
                        System.out.println("Time for client request #" + (i+1) + ": " + currentThreadTime);
                        turnAroundTime += Long.parseLong(currentThreadTime);
                    }
 
                    averageTime = turnAroundTime / (double)nThreads;
 
-                   column.add("");
-                   column.add(String.valueOf(averageTime));
-                   column.add(String.valueOf(turnAroundTime));
+                   columns.add("");
+                   columns.add(String.valueOf(averageTime));
+                   columns.add(String.valueOf(turnAroundTime));
 
                    operationsRan++;
-                   parser.export(column, String.format("%s-%s-%sThreads", reqType.name(), String.valueOf(operationsRan), String.valueOf(nThreads)));
+
+                   // save data in .csv file
+                   try (PrintWriter fileOut = new PrintWriter(String.format("%s-%s-%sThreads.txt", reqType.name(), operationsRan, nThreads))){
+                       StringBuilder output = new StringBuilder();
+
+                       for(int i = 0; i < columns.size(); i++) {
+                           if(i == 0) output.append(String.format("%s %n", columns.get(i)));
+
+                           int lastThree = columns.size() - 4;
+
+                           if(i > 0 && i < lastThree) output.append(String.format("%s ", columns.get(i)));
+                           if(i == lastThree) output.deleteCharAt(output.length() - 1);
+                           if(i == columns.size() - 3) output.append("\n");
+                           if(i == columns.size() - 2) output.append(String.format("Average server response time: %sms.%n", columns.get(i)));
+                           if(i == columns.size() - 1) output.append(String.format("Total turn-around time: %sms.%n", columns.get(i)));
+                       }
+
+                       fileOut.write(output.toString());
+                   } catch(FileNotFoundException e) {
+                       System.out.println("Couldn't create file: " + e.getMessage());
+                   }
+
                    ClientHandler.requestTotals.clear();
-                   System.out.println("\nAverage response time: " + averageTime);
-                   System.out.println("Total turn-around time: " + turnAroundTime);
+                   System.out.println("\nTotal turn-around time: " + df.format(turnAroundTime) + "ms.");
+                   System.out.println("Average server response time: " + df.format(averageTime) + "ms.");
                    System.out.println();
                }
            } catch (NumberFormatException e) {

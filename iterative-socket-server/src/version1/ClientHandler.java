@@ -6,10 +6,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import static version1.Server.*;
 
 public class ClientHandler extends Thread {
     private Socket client;

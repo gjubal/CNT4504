@@ -3,9 +3,10 @@ package version1;
 public enum RequestType {
     DateTime,
     Uptime,
-    Memory,
+    MemoryUse,
     Netstat,
     CurrentUsers,
     RunningProcesses,
     Quit,
+    None,
 }

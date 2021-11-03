@@ -10,21 +10,16 @@ import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class Server {
 
-    private static final int DEFAULT_PORT = 8080;
+    private static final int DEFAULT_PORT = 3400;
     private static ArrayList<ClientHandler> clients = new ArrayList<>();
 
     public static void main(String[] args) throws IOException {
         BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in)); // reads user keyboard input
         ServerSocket serverSocket;
         String preferredPort = "";
-//        boolean usingPortOtherThanDefault = false;
 
         System.out.println("\nWelcome to the iterative socket server!");
         System.out.print("Please insert the port you'd like to connect to (enter -1 to connect to the default port): ");
@@ -40,7 +35,6 @@ public class Server {
                 serverSocket = new ServerSocket(DEFAULT_PORT);
             } else {
                 serverSocket = new ServerSocket(Integer.parseInt(preferredPort));
-//                usingPortOtherThanDefault = true;
             }
 
             System.out.println();
@@ -48,15 +42,6 @@ public class Server {
             System.out.println("\nUnable to connect to the specified port, connecting to the default port...");
             serverSocket = new ServerSocket(DEFAULT_PORT);
         }
-
-//        HashMap<RequestType, String> resolvers = new HashMap<RequestType, String> (Map.of(
-//                RequestType.DateTime, getDateAndTime(),
-//                RequestType.Uptime, getUptime(),
-//                RequestType.Memory, getMemoryUse(),
-//                RequestType.Netstat, getNetStat(),
-//                RequestType.CurrentUsers, getCurrentUsers(),
-//                RequestType.RunningProcesses, getRunningProcesses()
-//        ));
 
         label:
         while(true) {
@@ -73,9 +58,6 @@ public class Server {
                 RequestType request = RequestType.valueOf(in.readLine());
 
                 if (request == RequestType.Quit) break;
-//
-//                String nThreads = in.readLine();
-//                System.out.println(nThreads);
 
                 System.out.println("Incoming " + request.toString() + " request from " + client.getInetAddress());
 
@@ -86,7 +68,7 @@ public class Server {
                     case "Uptime":
                         out.println(getUptime());
                         break;
-                    case "Memory":
+                    case "MemoryUse":
                         out.println(getMemoryUse());
                         break;
                     case "Netstat":
@@ -106,10 +88,10 @@ public class Server {
                         break;
                 }
             } catch (IOException e) {
-                System.err.println("Exception caught while handling a connection");
+                System.err.println("IO Exception caught.");
                 System.out.println(e.getMessage());
             } catch (NullPointerException e) {
-                System.err.println("Exception caught while handling a connection");
+                System.err.println("NullPointerException caught.");
                 System.out.println(e.getMessage());
             }
         }
@@ -130,7 +112,7 @@ public class Server {
 //        long endTime = System.nanoTime();
 //        long timeElapsed = endTime - startTime;
 //
-//        return  "The connection has been active for " + timeElapsed / 1000000000 + " seconds.";
+//        return  "The connection has been active for " + timeElapsed / 1000000 + " milliseconds.";
 //    }
 
     public static String getMemoryUse() {
@@ -158,7 +140,7 @@ public class Server {
     }
 
     public static String getRunningProcesses() {
-        return runCommandOnRuntime("ps -aux", "list running processes");
+        return runCommandOnRuntime("ps -l", "list running processes");
     }
 
     public static String runCommandOnRuntime(String command, String activity) {
@@ -173,7 +155,7 @@ public class Server {
 
             process.destroy();
         } catch (IOException e) {
-            System.out.println("Unable to run  command to " + activity + " .\n");
+            System.out.println("Unable to run command to " + activity + " .\n");
         }
 
         return acc;
