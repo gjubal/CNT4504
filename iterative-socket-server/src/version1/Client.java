@@ -6,14 +6,13 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 public class Client {
-    private static final String SERVER_IP = "127.0.0.1";
     private static final int SERVER_PORT = 3400;
 
     public static void main(String[] args) throws IOException, InterruptedException {
         BufferedReader keyboard = new BufferedReader(new InputStreamReader((System.in))); // reads user keyboard input
         Socket socket;
         DecimalFormat df = new DecimalFormat("##.##");
-        String preferredPort = "", command, preferredAddress = "";;
+        String preferredPort = "", command, preferredAddress = "";
         int nThreads, operationsRan = 0;
 
         System.out.println("\nWelcome to the iterative socket client!");
