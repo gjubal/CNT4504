@@ -40,8 +40,6 @@ public class Client {
             preferredPort = "3400";
         }
 
-//        BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
         PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
         System.out.println("Successfully connected!\n");
@@ -58,7 +56,6 @@ public class Client {
 
            command = keyboard.readLine();
 
-//           out.println(command);
            System.out.println();
 
            try {
@@ -107,7 +104,7 @@ public class Client {
                        String currentThreadTime = ClientHandler.requestTotals.get(i).toString();
 
                        columns.add(currentThreadTime);
-                       System.out.println("Time for client request #" + (i+1) + ": " + currentThreadTime);
+                       System.out.println("Time for request #" + (i+1) + ": " + currentThreadTime);
                        turnAroundTime += Long.parseLong(currentThreadTime);
                    }
 
@@ -119,7 +116,7 @@ public class Client {
 
                    operationsRan++;
 
-                   // save data in .csv file
+                   // save data in .txt file
                    try (PrintWriter fileOut = new PrintWriter(String.format("%s-%s-%sThreads.txt", reqType.name(), operationsRan, nThreads))){
                        StringBuilder output = new StringBuilder();
 
@@ -131,7 +128,7 @@ public class Client {
                            if(i > 0 && i < lastThree) output.append(String.format("%s ", columns.get(i)));
                            if(i == lastThree) output.deleteCharAt(output.length() - 1);
                            if(i == columns.size() - 3) output.append("\n");
-                           if(i == columns.size() - 2) output.append(String.format("Average server response time: %sms.%n", columns.get(i)));
+                           if(i == columns.size() - 2) output.append(String.format("Average response time: %sms.%n", columns.get(i)));
                            if(i == columns.size() - 1) output.append(String.format("Total turn-around time: %sms.%n", columns.get(i)));
                        }
 
@@ -142,7 +139,7 @@ public class Client {
 
                    ClientHandler.requestTotals.clear();
                    System.out.println("\nTotal turn-around time: " + df.format(turnAroundTime) + "ms.");
-                   System.out.println("Average server response time: " + df.format(averageTime) + "ms.");
+                   System.out.println("Average response time: " + df.format(averageTime) + "ms.");
                    System.out.println();
                }
            } catch (NumberFormatException e) {
