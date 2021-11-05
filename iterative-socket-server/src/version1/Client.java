@@ -13,10 +13,18 @@ public class Client {
         BufferedReader keyboard = new BufferedReader(new InputStreamReader((System.in))); // reads user keyboard input
         Socket socket;
         DecimalFormat df = new DecimalFormat("##.##");
-        String preferredPort = "", command;
+        String preferredPort = "", command, preferredAddress = "";;
         int nThreads, operationsRan = 0;
 
         System.out.println("\nWelcome to the iterative socket client!");
+        System.out.print("Please insert the address you'd like to connect to: ");
+
+        try {
+            preferredAddress = keyboard.readLine();
+        } catch( IOException e) {
+            e.printStackTrace();
+        }
+
         System.out.print("Please insert the server port you'd like to connect to (enter -1 to connect to the default port): ");
 
         try {
@@ -27,16 +35,16 @@ public class Client {
 
         try {
             if (Integer.parseInt(preferredPort) == -1) {
-                socket = new Socket(SERVER_IP, SERVER_PORT);
+                socket = new Socket(preferredAddress, SERVER_PORT);
                 preferredPort = "3400";
             } else {
-                socket = new Socket(SERVER_IP, Integer.parseInt(preferredPort));
+                socket = new Socket(preferredAddress, Integer.parseInt(preferredPort));
             }
 
             System.out.println();
         } catch (NumberFormatException ex) {
             System.out.println("\nUnable to connect to the specified port, connecting to the default port...");
-            socket = new Socket(SERVER_IP, SERVER_PORT);
+            socket = new Socket(preferredAddress, SERVER_PORT);
             preferredPort = "3400";
         }
 

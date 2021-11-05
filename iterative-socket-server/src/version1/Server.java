@@ -19,9 +19,10 @@ public class Server {
     public static void main(String[] args) throws IOException {
         BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in)); // reads user keyboard input
         ServerSocket serverSocket;
-        String preferredPort = "";
+        String preferredPort = "", preferredAddress = "";
 
         System.out.println("\nWelcome to the iterative socket server!");
+
         System.out.print("Please insert the port you'd like to connect to (enter -1 to connect to the default port): ");
 
         try {
@@ -59,7 +60,7 @@ public class Server {
 
                 if (request == RequestType.Quit) break;
 
-                System.out.println("Incoming " + request.toString() + " request from " + client.getInetAddress());
+                System.out.println("Incoming " + request.toString() + " request.");
 
                 switch (request.toString()) {
                     case "DateTime":
