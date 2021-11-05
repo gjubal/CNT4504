@@ -67,15 +67,33 @@ public class Client {
 
            try {
                if(Integer.parseInt(command) > 0 && Integer.parseInt(command) < 8) {
-                   RequestType reqType = switch (Integer.parseInt(command)) {
-                       case 1 -> RequestType.DateTime;
-                       case 2 -> RequestType.Uptime;
-                       case 3 -> RequestType.MemoryUse;
-                       case 4 -> RequestType.Netstat;
-                       case 5 -> RequestType.CurrentUsers;
-                       case 6 -> RequestType.RunningProcesses;
-                       case 7 -> RequestType.Quit;
-                       default -> RequestType.None;
+                   RequestType reqType = RequestType.None;
+
+                           switch (Integer.parseInt(command)) {
+                               case 1:
+                                   reqType = RequestType.DateTime;
+                                   break;
+                               case 2:
+                                   reqType = RequestType.Uptime;
+                                   break;
+                               case 3:
+                                   reqType = RequestType.MemoryUse;
+                                   break;
+                               case 4:
+                                   reqType = RequestType.Netstat;
+                                   break;
+                               case 5:
+                                   reqType = RequestType.CurrentUsers;
+                                   break;
+                               case 6:
+                                   reqType = RequestType.RunningProcesses;
+                                   break;
+                               case 7:
+                                   reqType = RequestType.Quit;
+                                   break;
+                               default:
+                                   reqType = RequestType.None;
+                                   break;
                    };
 
                    out.println(reqType);
