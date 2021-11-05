@@ -93,7 +93,7 @@ public class Client {
                    ClientHandler[] threads = new ClientHandler[nThreads];
 
                    for (int i = 0; i < nThreads; i++) {
-                       threads[i] = new ClientHandler(SERVER_IP, preferredPort, reqType, Integer.parseInt(preferredPort) != 8080, i + 1);
+                       threads[i] = new ClientHandler(preferredAddress, preferredPort, reqType, Integer.parseInt(preferredPort) != 8080, i + 1);
                    }
 
                    for(ClientHandler thread: threads) thread.start();
