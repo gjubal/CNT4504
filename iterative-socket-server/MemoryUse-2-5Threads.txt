@@ -1,0 +1,4 @@
+MemoryUse 
+57 55 50 47
+Average response time: 49.6ms.
+Total turn-around time: 248ms.

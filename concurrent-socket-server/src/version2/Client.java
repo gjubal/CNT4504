@@ -1,4 +1,4 @@
-package version1;
+package version2;
 
 import java.io.*;
 import java.net.Socket;
@@ -15,7 +15,7 @@ public class Client {
         String preferredPort = "", command, preferredAddress = "";
         int nThreads, operationsRan = 0;
 
-        System.out.println("\nWelcome to the iterative socket client!");
+        System.out.println("\nWelcome to the concurrent socket client!");
         System.out.print("Please insert the address you'd like to connect to: ");
 
         try {
@@ -116,7 +116,6 @@ public class Client {
                    for(ClientHandler thread: threads) thread.start();
 
                    for(ClientHandler thread: threads) thread.join();
-
 
                    ArrayList<String> columns = new ArrayList<>();
                    double averageTime;
